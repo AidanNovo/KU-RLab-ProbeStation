@@ -1,0 +1,184 @@
+{
+    "Pads": [
+        {
+            "Pad": 1,
+            "PositionX": 6.5,
+            "PositionY": 93.0,
+            "ShiftZ": 0
+        },
+        {
+            "Pad": 2,
+            "PositionX": 6.5,
+            "PositionY": 90.0,
+            "ShiftZ": 0
+        },
+        {
+            "Pad": 3,
+            "PositionX": 6.5,
+            "PositionY": 87.0,
+            "ShiftZ": 0
+        },
+        {
+            "Pad": 4,
+            "PositionX": 6.5,
+            "PositionY": 84.0,
+            "ShiftZ": 0
+        },
+        {
+            "Pad": 5,
+            "PositionX": 6.5,
+            "PositionY": 81.0,
+            "ShiftZ": 0
+        },
+        {
+            "Pad": 6,
+            "PositionX": 6.5,
+            "PositionY": 78.0,
+            "ShiftZ": 0
+        },
+        {
+            "Pad": 7,
+            "PositionX": 6.5,
+            "PositionY": 75.0,
+            "ShiftZ": 0
+        },
+        {
+            "Pad": 8,
+            "PositionX": 6.5,
+            "PositionY": 72.0,
+            "ShiftZ": 0
+        },
+        {
+            "Pad": 9,
+            "PositionX": 6.5,
+            "PositionY": 69.0,
+            "ShiftZ": 0
+        },
+        {
+            "Pad": 10,
+            "PositionX": 6.5,
+            "PositionY": 66.0,
+            "ShiftZ": 0
+        },
+        {
+            "Pad": 11,
+            "PositionX": 6.5,
+            "PositionY": 63.0,
+            "ShiftZ": 0
+        },
+        {
+            "Pad": 12,
+            "PositionX": 6.5,
+            "PositionY": 60.0,
+            "ShiftZ": 0
+        },
+        {
+            "Pad": 13,
+            "PositionX": 6.5,
+            "PositionY": 57.0,
+            "ShiftZ": 0
+        },
+        {
+            "Pad": 14,
+            "PositionX": 6.5,
+            "PositionY": 54.0,
+            "ShiftZ": 0
+        },
+        {
+            "Pad": 15,
+            "PositionX": 6.5,
+            "PositionY": 51.0,
+            "ShiftZ": 0
+        },
+        {
+            "Pad": 16,
+            "PositionX": 6.5,
+            "PositionY": 44.0,
+            "ShiftZ": 0
+        },
+        {
+            "Pad": 17,
+            "PositionX": 6.5,
+            "PositionY": 41.0,
+            "ShiftZ": 0
+        },
+        {
+            "Pad": 18,
+            "PositionX": 6.5,
+            "PositionY": 38.0,
+            "ShiftZ": 0
+        },
+        {
+            "Pad": 19,
+            "PositionX": 6.5,
+            "PositionY": 35.0,
+            "ShiftZ": 0
+        },
+        {
+            "Pad": 20,
+            "PositionX": 6.5,
+            "PositionY": 32.0,
+            "ShiftZ": 0
+        },
+        {
+            "Pad": 21,
+            "PositionX": 6.5,
+            "PositionY":29.0,
+            "ShiftZ": 0
+        },
+        {
+            "Pad": 22,
+            "PositionX": 6.5,
+            "PositionY": 26.0,
+            "ShiftZ": 0
+        },
+        {
+            "Pad": 23,
+            "PositionX": 6.5,
+            "PositionY": 23.0,
+            "ShiftZ": 0
+        },
+        {
+            "Pad": 24,
+            "PositionX": 6.5,
+            "PositionY": 20.0,
+            "ShiftZ": 0
+        },
+        {
+            "Pad": 25,
+            "PositionX": 6.5,
+            "PositionY": 17.0,
+            "ShiftZ": 0
+        },
+        {
+            "Pad": 26,
+            "PositionX": 6.5,
+            "PositionY": 14.0,
+            "ShiftZ": 0
+        },
+        {
+            "Pad": 27,
+            "PositionX": 6.5,
+            "PositionY": 11.0,
+            "ShiftZ": 0
+        },
+        {
+            "Pad": 28,
+            "PositionX": 6.5,
+            "PositionY": 8.0,
+            "ShiftZ": 0
+        },
+        {
+            "Pad": 29,
+            "PositionX": 6.5,
+            "PositionY": 5.0,
+            "ShiftZ": 0
+        },
+        {
+            "Pad": 30,
+            "PositionX": 6.5,
+            "PositionY": 2.0,
+            "ShiftZ": 0
+        }
+    ]
+}
