@@ -36,7 +36,7 @@ class Window(Frame):
         # Database format:
         # id: Identification of the json measurement
         # json_file_name: name of the json file that contains the electrical measurements from a given run
-        # assembly_name: name of the assembly
+        # assembly: name of the assembly
         # num_Run: the current run number (default is 1, starting at first run)
         # vendor: name of vendor that did the bump bonding (Ex: Micross, Pactech, etc.)
         # notes: additional notes
@@ -598,7 +598,7 @@ class Window(Frame):
     def writeDB(self, file_name):
         SQLconn = sqlite3.connect(self.DB_file)
         cursor = SQLconn.cursor()
-        c.execute("INSERT INTO json_files (json_file_name, assembly_name, num_Run, vendor, notes, location, humidity, temperature, wire_bonded, num_Shear, num_Compression, num_Thermal, nu_other) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", (file_name, str(self.assemblyEntry.get()), int(self.runEntry.get()), str(self.vendorEntry.get()), str(self.notesEntry.get()), str(self.locationEntry.get()), int(self.humidityEntry.get()), int(self.temperatureEntry.get()), int(self.wire_bonded), int(self.ShearEntry.get()), int(self.CompressionEntry.get()), int(self.ThermalEntry.get()), int(self.OtherEntry.get())))
+        c.execute("INSERT INTO json_files (json_file_name, assembly, num_Run, vendor, notes, location, humidity, temperature, wire_bonded, num_Shear, num_Compression, num_Thermal, num_other) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", (file_name, str(self.assemblyEntry.get()), int(self.runEntry.get()), str(self.vendorEntry.get()), str(self.notesEntry.get()), str(self.locationEntry.get()), int(self.humidityEntry.get()), int(self.temperatureEntry.get()), int(self.wire_bonded), int(self.ShearEntry.get()), int(self.CompressionEntry.get()), int(self.ThermalEntry.get()), int(self.OtherEntry.get())))
         SQLconn.commit()
         SQLconn.close()
         print("Successfully Updated Database")
