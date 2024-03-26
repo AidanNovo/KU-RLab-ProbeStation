@@ -29,13 +29,14 @@ class Window(Frame):
         self.cam = cv2.VideoCapture(1)
         time.sleep(1)
 
-        self.DB_file = "VQ_Dummies_2024.db"
+        self.DB_file = "KU_Dummies_VQ_2024.db"
         
         SQLconn = sqlite3.connect(self.DB_file)
         cursor = SQLconn.cursor()
         # Database format:
         # id: Identification of the json measurement
         # json_file_name: name of the json file that contains the electrical measurements from a given run
+        # assembly_name: name of the assembly
         # num_Run: the current run number (default is 1, starting at first run)
         # vendor: name of vendor that did the bump bonding (Ex: Micross, Pactech, etc.)
         # notes: additional notes
@@ -45,7 +46,7 @@ class Window(Frame):
         # wire_bonded: 0 if not wire bonded onto a PCB, 1 if wire bonded onto a PCB (Default is 0)
         # num_Shear, compression, thermal, other: Number of other tests that have already been performed (default is 0)
         cursor.execute('''CREATE TABLE IF NOT EXISTS json_files
-                              (id INTEGER PRIMARY KEY, json_file_name TEXT, num_Run INTEGER, vendor TEXT, notes TEXT, location TEXT, humidity INTEGER, temperature INTEGER, wire_bonded INTEGER, num_Shear INTEGER, num_Compression INTEGER, num_Thermal INTEGER, num_other INTEGER)''')
+                              (id INTEGER PRIMARY KEY, json_file_name TEXT, assembly TEXT, num_Run INTEGER, vendor TEXT, notes TEXT, location TEXT, humidity INTEGER, temperature INTEGER, wire_bonded INTEGER, num_Shear INTEGER, num_Compression INTEGER, num_Thermal INTEGER, num_other INTEGER)''')
         SQLconn.commit()
         SQLconn.close()
         
@@ -140,6 +141,12 @@ class Window(Frame):
         notesLabel = Label(self, text="Notes:")
         self.notesEntry = Entry(self, textvariable=self.notesVar, width=10)
 
+        self.assembly = "NULL"
+        self.assemblyVar=StringVar()
+        self.assemblyVar.set(str(self.assembly))
+        assemblyLabel = Label(self, text="Assembly:")
+        self.assemblyEntry = Entry(self, textvariable=self.assemblyVar, width=10)
+
         self.run = 0
         self.runVar=StringVar() 
         self.runVar.set(str(self.run))
@@ -150,7 +157,7 @@ class Window(Frame):
         self.vendorVar=StringVar()
         self.vendorVar.set(str(self.vendor))
         vendorLabel = Label(self, text="Vendor:")
-        self.vendorEntry = Entry(self, textvariable=self.vendorVar, width=15)
+        self.vendorEntry = Entry(self, textvariable=self.vendorVar, width=10)
 
         self.location = "KU"
         self.locationVar=StringVar()
@@ -361,6 +368,8 @@ class Window(Frame):
         self.runEntry.place(x=650,y=375)
 
         # NEW
+        assemblyLabel.place(x=900,y=900)
+        self.assemblyEntry.place(x=900,y=850)
         vendorLabel.place(x=850,y=100)
         self.vendorEntry.place(x=850,y=50)
         locationLabel.place(x=850,y=200)
@@ -589,7 +598,7 @@ class Window(Frame):
     def writeDB(self, file_name):
         SQLconn = sqlite3.connect(self.DB_file)
         cursor = SQLconn.cursor()
-        c.execute("INSERT INTO json_files (json_file_name, num_Run, vendor, notes, location, humidity, temperature, wire_bonded, num_Shear, num_Compression, num_Thermal, nu_other) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", (file_name, int(self.runEntry.get()), str(self.vendorEntry.get()), str(self.notesEntry.get()), str(self.locationEntry.get()), int(self.humidityEntry.get()), int(self.temperatureEntry.get()), int(self.wire_bonded), int(self.ShearEntry.get()), int(self.CompressionEntry.get()), int(self.ThermalEntry.get()), int(self.OtherEntry.get())))
+        c.execute("INSERT INTO json_files (json_file_name, assembly_name, num_Run, vendor, notes, location, humidity, temperature, wire_bonded, num_Shear, num_Compression, num_Thermal, nu_other) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", (file_name, str(self.assemblyEntry.get()), int(self.runEntry.get()), str(self.vendorEntry.get()), str(self.notesEntry.get()), str(self.locationEntry.get()), int(self.humidityEntry.get()), int(self.temperatureEntry.get()), int(self.wire_bonded), int(self.ShearEntry.get()), int(self.CompressionEntry.get()), int(self.ThermalEntry.get()), int(self.OtherEntry.get())))
         SQLconn.commit()
         SQLconn.close()
         print("Successfully Updated Database")
