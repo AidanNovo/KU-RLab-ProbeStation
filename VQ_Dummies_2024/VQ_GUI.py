@@ -593,7 +593,7 @@ class Window(Frame):
         c.execute("INSERT INTO json_files (json_file_name, assembly, num_Run, vendor, notes, location, humidity, temperature, wire_bonded, num_Shear, num_Compression, num_Thermal, num_other) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", (file_name, str(self.assemblyEntry.get()), int(self.runEntry.get()), str(self.vendorEntry.get()), str(self.notesEntry.get()), str(self.locationEntry.get()), int(self.humidityEntry.get()), int(self.temperatureEntry.get()), int(self.wire_bonded), int(self.ShearEntry.get()), int(self.CompressionEntry.get()), int(self.ThermalEntry.get()), int(self.OtherEntry.get())))
         SQLconn.commit()
         SQLconn.close()
-        print("Successfully Updated Database")
+        print(f"Successfully added {file_name} to database {self.DB_file}")
 
     def loadPoints(self):
         filename = str(self.loadPointsFileEntry.get())
