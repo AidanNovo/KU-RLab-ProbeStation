@@ -1,8 +1,4 @@
 import sqlite3
-DB_file = "KU_Dummies_VQ_2024.db"
-
-SQLconn = sqlite3.connect(DB_file)
-cursor = SQLconn.cursor()
 # Database format:
 # id: Identification of the json measurement
 # json_file_name: name of the json file that contains the electrical measurements from a given run
@@ -28,9 +24,18 @@ num_Shear = 0
 num_Compression = 0
 num_Thermal = 0
 num_Other = 0
-cursor.execute('''CREATE TABLE IF NOT EXISTS json_files
-                      (id INTEGER PRIMARY KEY, json_file_name TEXT, assembly TEXT, num_Run INTEGER, vendor TEXT, notes TEXT, location TEXT, humidity INTEGER, temperature INTEGER, wire_bonded INTEGER, num_Shear INTEGER, num_Compression INTEGER, num_Thermal INTEGER, num_other INTEGER)''')
 
+DB_file = "KU_Dummies_VQ_2024.db"
+
+SQLconn = sqlite3.connect(DB_file)
+cursor = SQLconn.cursor()
+
+# Example add to table
+cursor.execute('''CREATE TABLE IF NOT EXISTS json_files (id INTEGER PRIMARY KEY, json_file_name TEXT, assembly TEXT, num_Run INTEGER, vendor TEXT, notes TEXT, location TEXT, humidity INTEGER, temperature INTEGER, wire_bonded INTEGER, num_Shear INTEGER, num_Compression INTEGER, num_Thermal INTEGER, num_other INTEGER)''')
 cursor.execute("INSERT INTO json_files (json_file_name, assembly, num_Run, vendor, notes, location, humidity, temperature, wire_bonded, num_Shear, num_Compression, num_Thermal, num_other) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", (json_file_name, assembly_name, num_Run, vendor, notes, location, humidity, temperature, wire_bonded, num_Shear, num_Compression, num_Thermal, num_Other))
+
+# Example remove from table
+#cursor.execute("DELETE FROM json_files WHERE json_file_name = ?", (json_file_name,))
+
 SQLconn.commit()
 SQLconn.close()
