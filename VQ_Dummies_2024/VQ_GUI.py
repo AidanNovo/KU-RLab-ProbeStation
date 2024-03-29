@@ -13,21 +13,22 @@ import sqlite3
 
 class Window(Frame):
 
-    def __init__(self, master=None, motorsPort='COM4', keithleyPort='COM13', emulate=False):
+    def __init__(self, master=None):
+    #def __init__(self, master=None, motorsPort='COM4', keithleyPort='COM13', emulate=False):
         Frame.__init__(self, master)        
         self.master = master
-        self.emulate = emulate
+        #self.emulate = emulate
 
-        self.motors = motion.motion(port=motorsPort, emulate=emulate)
+        #self.motors = motion.motion(port=motorsPort, emulate=emulate)
 
-        self.kt = keithley.Keithley(port=keithleyPort, emulate=emulate)
-        self.kt.reset()
-        self.kt.on()
+        #self.kt = keithley.Keithley(port=keithleyPort, emulate=emulate)
+        #self.kt.reset()
+        #self.kt.on()
 
-        self.safetyResist = 50000
+        #self.safetyResist = 50000
 
-        self.cam = cv2.VideoCapture(1)
-        time.sleep(1)
+        #self.cam = cv2.VideoCapture(1)
+        #time.sleep(1)
 
         self.DB_file = "KU_Dummies_VQ_2024.db"
         
@@ -42,7 +43,7 @@ class Window(Frame):
         # notes: additional notes
         # location: location of where the measurements were taken (KU, FNAL, CERN, etc.)
         # humidity: humidity of the environment. Default will be -1, meaning data was not taken
-        # temperature: temperature of the environment. Default will be -1, meaning data was not taken
+        # temperature: temperature of the environment. Default will be -100, meaning data was not taken
         # wire_bonded: 0 if not wire bonded onto a PCB, 1 if wire bonded onto a PCB (Default is 0)
         # num_Shear, compression, thermal, other: Number of other tests that have already been performed (default is 0)
         cursor.execute('''CREATE TABLE IF NOT EXISTS json_files
@@ -51,7 +52,7 @@ class Window(Frame):
         SQLconn.close()
         
         self.resistanceMeasurement = {
-            'Sensor': "defaultSensor",
+            'Assembly': "defaultAssembly",
             'Measurement': "resistance",
             'Notes': "",
             'Run': "",
@@ -61,11 +62,11 @@ class Window(Frame):
         self.stepSizeXY = 1
         self.stepSizeZ = 1
         
-        self.sensorsPositions = []
+        self.assemblysPositions = []
         self.measuredPositions = []
 
         self.TM = TransformMatrix.TransformMatrix()
-        # self.TM.Calibrate(self.sensorsPositions)
+        # self.TM.Calibrate(self.assemblysPositions)
 
         self.stepSizeVarXY=StringVar() 
         self.stepSizeVarXY.set(str(self.stepSizeXY))
@@ -116,11 +117,12 @@ class Window(Frame):
         loadCalibrationFileLabel = Label(self, text="Load Calibration From:")
         self.loadCalibrationFileEntry = Entry(self, textvariable=self.loadCalibrationFileVar, width=20)
 
-        self.sensor = "Sensor"
-        self.sensorVar=StringVar() 
-        self.sensorVar.set(str(self.sensor))
-        sensorLabel = Label(self, text="Sensor:")
-        self.sensorEntry = Entry(self, textvariable=self.sensorVar, width=10)
+        self.assembly = "Assembly"
+        self.assemblyVar=StringVar() 
+        self.assemblyVar.set(str(self.assembly))
+        assemblyLabel = Label(self, text="Assembly:")
+        self.assemblyEntry = Entry(self, textvariable=self.assemblyVar, width=20)
+
         self.pad = "Pad"
         self.padVar=StringVar() 
         self.padVar.set(str(self.pad))
@@ -139,13 +141,7 @@ class Window(Frame):
         self.notesVar=StringVar() 
         self.notesVar.set(str(self.notes))
         notesLabel = Label(self, text="Notes:")
-        self.notesEntry = Entry(self, textvariable=self.notesVar, width=10)
-
-        self.assembly = "NULL"
-        self.assemblyVar=StringVar()
-        self.assemblyVar.set(str(self.assembly))
-        assemblyLabel = Label(self, text="Assembly:")
-        self.assemblyEntry = Entry(self, textvariable=self.assemblyVar, width=10)
+        self.notesEntry = Entry(self, textvariable=self.notesVar, width=20)
 
         self.run = 0
         self.runVar=StringVar() 
@@ -169,40 +165,37 @@ class Window(Frame):
         self.humidityVar=IntVar()
         self.humidityVar.set(str(self.humidity))
         humidityLabel = Label(self, text="Humidity:")
-        self.humidityEntry = Entry(self, textvariable=self.humidityVar, width=10)
+        self.humidityEntry = Entry(self, textvariable=self.humidityVar, width=5)
 
-        self.temperature = -1
+        self.temperature = -100
         self.temperatureVar=IntVar()
         self.temperatureVar.set(str(self.temperature))
         temperatureLabel = Label(self, text="Temperature:")
-        self.temperatureEntry = Entry(self, textvariable=self.temperatureVar, width=10)
-
-        self.wire_bonded=IntVar()
-        wire_bondedLabel = Label(self, text="Wire Bonded:")
+        self.temperatureEntry = Entry(self, textvariable=self.temperatureVar, width=5)
 
         self.Shear = 0
         self.ShearVar=IntVar()
         self.ShearVar.set(str(self.Shear))
         ShearLabel = Label(self, text="Shear:")
-        self.ShearEntry = Entry(self, textvariable=self.ShearVar, width=10)
+        self.ShearEntry = Entry(self, textvariable=self.ShearVar, width=5)
 
         self.Compression = 0
         self.CompressionVar=IntVar()
         self.CompressionVar.set(str(self.Compression))
         CompressionLabel = Label(self, text="Compression:")
-        self.CompressionEntry = Entry(self, textvariable=self.CompressionVar, width=10)
+        self.CompressionEntry = Entry(self, textvariable=self.CompressionVar, width=5)
 
         self.Thermal = 0
         self.ThermalVar=IntVar()
         self.ThermalVar.set(str(self.Thermal))
         ThermalLabel = Label(self, text="Thermal:")
-        self.ThermalEntry = Entry(self, textvariable=self.ThermalVar, width=10)
+        self.ThermalEntry = Entry(self, textvariable=self.ThermalVar, width=5)
 
         self.Other = 0
         self.OtherVar=IntVar()
         self.OtherVar.set(str(self.Other))
         OtherLabel = Label(self, text="Other:")
-        self.OtherEntry = Entry(self, textvariable=self.OtherVar, width=10)
+        self.OtherEntry = Entry(self, textvariable=self.OtherVar, width=5)
 
         self.loadPointsFile = "defaultPoints.json"
         self.loadPointsFileVar=StringVar() 
@@ -344,7 +337,7 @@ class Window(Frame):
 
         readResistanceButton.place(x=575,y=110)
         checkContactButton.place(x=575,y=60)
-        getMinResistanceButton.place(x=800,y=60)
+        #getMinResistanceButton.place(x=800,y=60)
         loadPointsFileLabel.place(x=575,y=150)
         self.loadPointsFileEntry.place(x=575,y=175)
         self.loadPointsButton.place(x=575,y=200)
@@ -352,43 +345,42 @@ class Window(Frame):
         self.measureAllPointsButton.place(x=575,y=300)
         self.raiseToContactButton.place(x=575,y=10)
 
-        sensorLabel.place(x=625,y=400)
-        self.sensorEntry.place(x=625,y=425)
-        padLabel.place(x=625,y=450)
-        self.padEntry.place(x=625,y=475)
-        self.saveResistanceButton.place(x=575,y=500)
-        self.writeResistanceButton.place(x=575,y=550)
-        nominalPadPositionXLabel.place(x=575,y=400)
-        self.nominalPadPositionXEntry.place(x=575,y=425)
-        nominalPadPositionYLabel.place(x=575,y=450)
-        self.nominalPadPositionYEntry.place(x=575,y=475)
-        notesLabel.place(x=575,y=350)
-        self.notesEntry.place(x=575,y=375)
-        runLabel.place(x=650,y=350)
-        self.runEntry.place(x=650,y=375)
+        self.saveResistanceButton.place(x=575,y=350)
+        self.writeResistanceButton.place(x=575,y=400)
+        #padLabel.place(x=575,y=450)
+        #self.padEntry.place(x=575,y=475)
+        #nominalPadPositionXLabel.place(x=575,y=500)
+        #self.nominalPadPositionXEntry.place(x=575,y=525)
+        #nominalPadPositionYLabel.place(x=625,y=500)
+        #self.nominalPadPositionYEntry.place(x=625,y=525)
 
         # NEW
-        assemblyLabel.place(x=900,y=900)
-        self.assemblyEntry.place(x=900,y=850)
-        vendorLabel.place(x=850,y=100)
-        self.vendorEntry.place(x=850,y=50)
-        locationLabel.place(x=850,y=200)
-        self.locationEntry.place(x=850,y=150)
-        humidityLabel.place(x=850,y=300)
-        self.humidityEntry.place(x=850,y=250)
-        temperatureLabel.place(x=850,y=400)
-        self.temperatureEntry.place(x=850,y=350)
-        ShearLabel.place(x=850,y=500)
-        self.ShearEntry.place(x=850,y=450)
-        CompressionLabel.place(x=850,y=600)
-        self.CompressionEntry.place(x=850,y=550)
-        ThermalLabel.place(x=850,y=700)
-        self.ThermalEntry.place(x=850,y=650)
-        OtherLabel.place(x=850,y=800)
-        self.OtherEntry.place(x=850,y=750)
-        wire_bondedLabel.place(x=900,y=200)
-        self.wire_bonded_checkbox = Checkbutton(self, text="Wire Bonded?", variable=self.wire_bonded, command=pass)
-        self.wire_bonded_checkbox.place(x=950,y=200)
+        assemblyLabel.place(x=750,y=25)
+        self.assemblyEntry.place(x=750,y=50)
+        vendorLabel.place(x=750,y=75)
+        self.vendorEntry.place(x=750,y=100)
+        locationLabel.place(x=750,y=125)
+        self.locationEntry.place(x=750,y=150)
+        humidityLabel.place(x=750,y=175)
+        self.humidityEntry.place(x=750,y=200)
+        temperatureLabel.place(x=750,y=225)
+        self.temperatureEntry.place(x=750,y=250)
+        ShearLabel.place(x=750,y=275)
+        self.ShearEntry.place(x=750,y=300)
+        CompressionLabel.place(x=750,y=325)
+        self.CompressionEntry.place(x=750,y=350)
+        ThermalLabel.place(x=750,y=375)
+        self.ThermalEntry.place(x=750,y=400)
+        OtherLabel.place(x=750,y=425)
+        self.OtherEntry.place(x=750,y=450)
+        runLabel.place(x=750,y=475)
+        self.runEntry.place(x=750,y=500)
+        notesLabel.place(x=750,y=525)
+        self.notesEntry.place(x=750,y=550)
+        self.wire_bonded=IntVar()
+        self.wire_bonded_checkbox = Checkbutton(self, text="Wire Bonded?", variable=self.wire_bonded, command=self.check_wire_bonded)
+        self.wire_bonded_checkbox.place(x=742,y=575)
+
 
         #self.NeedleTest.place(x=700,y=110)
 
@@ -397,7 +389,7 @@ class Window(Frame):
     
     def clearCalibrations(self):
         print("Clearing Calibrations")
-        self.sensorsPositions = []
+        self.assemblysPositions = []
         self.measuredPositions = []
         self.saveButton['state'] = ACTIVE
         self.setHomeButton['state'] = ACTIVE
@@ -412,7 +404,7 @@ class Window(Frame):
         except NameError:
             to_unicode = str
         calibration = {
-            'sensorsPositions': self.sensorsPositions,
+            'assemblysPositions': self.assemblysPositions,
             'measuredPositions': self.measuredPositions
         }
         filename = str(self.saveCalibrationFileEntry.get())
@@ -426,21 +418,21 @@ class Window(Frame):
         filename = str(self.loadCalibrationFileEntry.get())
         with open(filename) as f:
             calibration=json.load(f)
-        self.sensorsPositions = calibration.get('sensorsPositions')
+        self.assemblysPositions = calibration.get('assemblysPositions')
         self.measuredPositions = calibration.get('measuredPositions')
         print("Loaded Calibration from: "+filename)
         self.calibrate()
 
     def savePosition(self):
-        print(f'Saving position at {len(self.sensorsPositions)}')
-        if len(self.sensorsPositions) == 0:
+        print(f'Saving position at {len(self.assemblysPositions)}')
+        if len(self.assemblysPositions) == 0:
             self.setHome()
-            self.sensorsPositions.append([0,0])
+            self.assemblysPositions.append([0,0])
         else:
             expX = -1.*float(self.expectedPositionXEntry.get())
             expY = -1.*float(self.expectedPositionYEntry.get())
-            self.sensorsPositions.append([expX,expY])
-        self.savedPointsVar.set(len(self.sensorsPositions))
+            self.assemblysPositions.append([expX,expY])
+        self.savedPointsVar.set(len(self.assemblysPositions))
         lastPosition = self.motors.getPosition()
         self.moveToXVar.set(str(-1.*lastPosition[0]))
         self.moveToYVar.set(str(lastPosition[1]))
@@ -487,11 +479,11 @@ class Window(Frame):
         self.moveToYVar.set(str(pos[1]))
 
     def moveBtn(self, x, y, z):
-        if x is not 0:
+        if x != 0:
             self.motors.moveFor('x',x)
-        if y is not 0:
+        if y != 0:
             self.motors.moveFor('y',y)
-        if z is not 0:
+        if z != 0:
 ##            if z > 0:
 ##                if self.checkContact() is True:
 ##                    print("Not going to move as chuck is already in contact...")
@@ -505,9 +497,9 @@ class Window(Frame):
 
     def calibrate(self):
         print("Calibrating ")
-        print(self.sensorsPositions)
+        print(self.assemblysPositions)
         print(self.measuredPositions)
-        self.TM.Calibrate(self.sensorsPositions, self.measuredPositions, weighted=True)   
+        self.TM.Calibrate(self.assemblysPositions, self.measuredPositions, weighted=True)   
         self.saveButton['state'] = DISABLED
         self.setHomeButton['state'] = DISABLED
         self.calibrateButton['state'] = DISABLED
@@ -515,7 +507,7 @@ class Window(Frame):
 
     def setSafetyLimit(self,motor,upper):
         if upper is True:
-            if motor is 'z':
+            if motor == 'z':
                 self.motors.setSafetyLimit(motor=motor,min=None,max=np.round(float(self.motors.getPosition(motor))+0.05,decimals=3))
             else:
                 self.motors.setSafetyLimit(motor=motor,min=None,max=np.round(self.motors.getPosition(motor),decimals=3))
@@ -544,7 +536,7 @@ class Window(Frame):
         print(f"{results['R']:.3f} +- {results['Rerr']:.3f}")
         return results
 
-    def saveResistance(self,sensor="defaultSensor", padNumber=-1, notes="", run=0, x=-1, y=-1, results=None):
+    def saveResistance(self,assembly="defaultAssembly", padNumber=-1, notes="", run=0, x=-1, y=-1, results=None):
         if results is None:
             results = self.readResistance(debug=True)
         if results['R'] == 1e6:
@@ -565,34 +557,34 @@ class Window(Frame):
             'Notes': str(self.notesEntry.get()),
             'Run': run
         }
-        print("Saving Resitance for pad: "+str(padNumber)+" on sensor: "+sensor)
+        print("Saving Resitance for pad: "+str(padNumber)+" on assembly: "+assembly)
         self.resistanceMeasurement['Values'].append( pad )
         self.kt.keithley.beep(frequency=2000,duration=1)
 
     def saveResistanceManual(self):
-        sensor = str(self.sensorEntry.get())
+        assembly = str(self.assemblyEntry.get())
         padNumber = int(self.padEntry.get())
         notes = str(self.notesEntry.get())
         run = str(self.runEntry.get())
         x = float(self.nominalPadPositionXEntry.get())
         y = float(self.nominalPadPositionYEntry.get())
-        self.saveResistance(sensor,padNumber,notes,run,x,y,self.readResistance(debug=True))
+        self.saveResistance(assembly,padNumber,notes,run,x,y,self.readResistance(debug=True))
 
     def writeResistance(self):
         try:
             to_unicode = unicode
         except NameError:
             to_unicode = str
-        sensor = str(self.sensorEntry.get())
+        assembly = str(self.assemblyEntry.get())
         run = str(self.runEntry.get())
-        filename = sensor+"_Run"+run+"_"+"resistance.json"
+        filename = assembly+"_Run"+run+"_"+"resistance.json"
         self.resistanceMeasurement["Notes"] =  str(self.notesEntry.get())
         if os.path.exists(filename):
             os.remove(filename)
         with open(filename,'a',encoding='utf8') as f:
            dump = json.dumps(self.resistanceMeasurement,indent=4,sort_keys=True,separators=(',',": "),ensure_ascii=False)
            f.write(to_unicode(dump))
-        print("Writing Resitance for run "+run+" of sensor: "+sensor+" to file: "+filename)
+        print("Writing Resitance for run "+run+" of assembly: "+assembly+" to file: "+filename)
         self.writeDB(filename)
 
     def writeDB(self, file_name):
@@ -613,15 +605,15 @@ class Window(Frame):
         self.testAllPointsButton['state'] = ACTIVE
 
     def measureAllPoints(self,test=False):
-        sensor = str(self.sensorEntry.get())
+        assembly = str(self.assemblyEntry.get())
         run = str(self.runEntry.get())
         lastContactZ = 0
         total_attempts = 1 # note should be 3 for "real" testing
         if test:
             self.motors.moveFor('z',-0.5)
         else:
-            if not os.path.exists("img/"+sensor+"_Run"+run):
-                os.makedirs("img/"+sensor+"_Run"+run)
+            if not os.path.exists("img/"+assembly+"_Run"+run):
+                os.makedirs("img/"+assembly+"_Run"+run)
 
         for p in self.resistanceMeasurement['Pads']:
             print("Measuring Pad: "+str(p.get('Pad')))
@@ -640,7 +632,7 @@ class Window(Frame):
             if test:
                 continue
 
-            if lastContactZ is 0:
+            if lastContactZ == 0:
                 self.motors.moveTo('z',0.0)
                 if self.raiseToSoftContact(step=0.2,maxMovement=1.8):
                     lastContactZ = self.motors.getPosition('z')
@@ -662,10 +654,10 @@ class Window(Frame):
                     pad = p.get('Pad')
                     time.sleep(0.25)
                     ret, frame = self.cam.read()
-                    cv2.imwrite(f"img/"+sensor+"_Run"+run+"/Pad"+str(pad)+"_"+str(attempt)+".png", frame)
+                    cv2.imwrite(f"img/"+assembly+"_Run"+run+"/Pad"+str(pad)+"_"+str(attempt)+".png", frame)
                 results = self.readResistance(debug=True)
                 notes = str(self.notesEntry.get())
-                self.saveResistance(sensor,p.get('Pad'),notes,run,x_given,y_given,results) # save it in any case, we take care in data analysis
+                self.saveResistance(assembly,p.get('Pad'),notes,run,x_given,y_given,results) # save it in any case, we take care in data analysis
             self.motors.moveTo('z',-0.1)
 
         self.goHome()
@@ -813,7 +805,7 @@ class Window(Frame):
 
     def NeedleTest(self):
         print("Testing Needles")
-        sensor = str(self.sensorEntry.get())
+        assembly = str(self.assemblyEntry.get())
         cam = cv2.VideoCapture(1)
         time.sleep(10)
         attempts = 200
@@ -829,9 +821,12 @@ class Window(Frame):
             #while frame is None:
                 #time.sleep(0.2)
                 #ret, frame = cam.read()
-                #cv2.imwrite(f"img/{sensor}/test{attempt}.png", frame)
+                #cv2.imwrite(f"img/{assembly}/test{attempt}.png", frame)
         cam.release()
         self.writeResistance()
+
+    def check_wire_bonded(self):
+        return self.wire_bonded
             
 
 root = Tk()
