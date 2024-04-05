@@ -13,24 +13,23 @@ import sqlite3
 
 class Window(Frame):
 
-    def __init__(self, master=None):
-    #def __init__(self, master=None, motorsPort='COM4', keithleyPort='COM13', emulate=False):
+    #def __init__(self, master=None):
+    def __init__(self, master=None, motorsPort='COM4', keithleyPort='COM13', emulate=False):
         Frame.__init__(self, master)        
         self.master = master
-        #self.emulate = emulate
+        self.emulate = emulate
 
-        #self.motors = motion.motion(port=motorsPort, emulate=emulate)
+        self.motors = motion.motion(port=motorsPort, emulate=emulate)
 
-        #self.kt = keithley.Keithley(port=keithleyPort, emulate=emulate)
-        #self.kt.reset()
-        #self.kt.on()
+        self.kt = keithley.Keithley(port=keithleyPort, emulate=emulate)
+        self.kt.reset()
+        self.kt.on()
 
-        #self.safetyResist = 50000
+        self.safetyResist = 50000
 
-        #self.cam = cv2.VideoCapture(1)
+        self.cam = cv2.VideoCapture(1)
         #time.sleep(1)
-
-        self.DB_file = "KU_Dummies_VQ_2024.db"
+        self.DB_file = "../../../../cernbox/KU_Dummies_VQ_2024/KU_Dummies_VQ_2024.db"
         
         SQLconn = sqlite3.connect(self.DB_file)
         cursor = SQLconn.cursor()
@@ -121,7 +120,7 @@ class Window(Frame):
         self.assemblyVar=StringVar() 
         self.assemblyVar.set(str(self.assembly))
         assemblyLabel = Label(self, text="Assembly:")
-        self.assemblyEntry = Entry(self, textvariable=self.assemblyVar, width=20)
+        self.assemblyEntry = Entry(self, textvariable=self.assemblyVar, width=25)
 
         self.pad = "Pad"
         self.padVar=StringVar() 
@@ -197,7 +196,7 @@ class Window(Frame):
         OtherLabel = Label(self, text="Other:")
         self.OtherEntry = Entry(self, textvariable=self.OtherVar, width=5)
 
-        self.loadPointsFile = "defaultPoints.json"
+        self.loadPointsFile = "PointsCNM_VQ.json"
         self.loadPointsFileVar=StringVar() 
         self.loadPointsFileVar.set(str(self.loadPointsFile))
         loadPointsFileLabel = Label(self, text="Load Points:")
@@ -377,8 +376,8 @@ class Window(Frame):
         self.runEntry.place(x=750,y=500)
         notesLabel.place(x=750,y=525)
         self.notesEntry.place(x=750,y=550)
-        self.wire_bonded=IntVar()
-        self.wire_bonded_checkbox = Checkbutton(self, text="Wire Bonded?", variable=self.wire_bonded, command=self.check_wire_bonded)
+        self.wire_bonded=IntVar(value=0)
+        self.wire_bonded_checkbox = Checkbutton(self, text="Wire Bonded?", variable=self.wire_bonded)
         self.wire_bonded_checkbox.place(x=742,y=575)
 
 
@@ -588,9 +587,21 @@ class Window(Frame):
         self.writeDB(filename)
 
     def writeDB(self, file_name):
+        cernbox_path = "../../../../cernbox/KU_Dummies_VQ_2024/"
+        full_file_name = cernbox_path+file_name
+        try:
+            to_unicode = unicode
+        except NameError:
+            to_unicode = str
+        assembly = str(self.assemblyEntry.get())
+        run = str(self.runEntry.get())
+        with open(full_file_name,'a',encoding='utf8') as f:
+           dump = json.dumps(self.resistanceMeasurement,indent=4,sort_keys=True,separators=(',',": "),ensure_ascii=False)
+           f.write(to_unicode(dump))
+        print("Writing Resitance for run "+run+" of assembly: "+assembly+" to file: "+file_name+" in database")
         SQLconn = sqlite3.connect(self.DB_file)
         cursor = SQLconn.cursor()
-        c.execute("INSERT INTO json_files (json_file_name, assembly, num_Run, vendor, notes, location, humidity, temperature, wire_bonded, num_Shear, num_Compression, num_Thermal, num_other) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", (file_name, str(self.assemblyEntry.get()), int(self.runEntry.get()), str(self.vendorEntry.get()), str(self.notesEntry.get()), str(self.locationEntry.get()), int(self.humidityEntry.get()), int(self.temperatureEntry.get()), int(self.wire_bonded), int(self.ShearEntry.get()), int(self.CompressionEntry.get()), int(self.ThermalEntry.get()), int(self.OtherEntry.get())))
+        cursor.execute("INSERT INTO json_files (json_file_name, assembly, num_Run, vendor, notes, location, humidity, temperature, wire_bonded, num_Shear, num_Compression, num_Thermal, num_other) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", (file_name, str(self.assemblyEntry.get()), int(self.runEntry.get()), str(self.vendorEntry.get()), str(self.notesEntry.get()), str(self.locationEntry.get()), float(self.humidityEntry.get()), float(self.temperatureEntry.get()), self.wire_bonded.get(), int(self.ShearEntry.get()), int(self.CompressionEntry.get()), int(self.ThermalEntry.get()), int(self.OtherEntry.get())))
         SQLconn.commit()
         SQLconn.close()
         print(f"Successfully added {file_name} to database {self.DB_file}")
@@ -608,7 +619,7 @@ class Window(Frame):
         assembly = str(self.assemblyEntry.get())
         run = str(self.runEntry.get())
         lastContactZ = 0
-        total_attempts = 1 # note should be 3 for "real" testing
+        total_attempts = 5 # note should be at least 3 for "real" testing
         if test:
             self.motors.moveFor('z',-0.5)
         else:
@@ -647,7 +658,7 @@ class Window(Frame):
 
             while attempt <= total_attempts:
                 if attempt > 0:
-                    self.motors.moveFor('z',0.05)
+                    self.motors.moveFor('z',0.03)
                 attempt += 1
                 frame = None
                 while frame is None:
@@ -658,6 +669,9 @@ class Window(Frame):
                 results = self.readResistance(debug=True)
                 notes = str(self.notesEntry.get())
                 self.saveResistance(assembly,p.get('Pad'),notes,run,x_given,y_given,results) # save it in any case, we take care in data analysis
+                # break if already measured "good enough" resistance
+                # if results['R'] < 30. and results['Rerr'] < 1.e-4 and attempt > 1:
+                #     break
             self.motors.moveTo('z',-0.1)
 
         self.goHome()
@@ -824,14 +838,11 @@ class Window(Frame):
                 #cv2.imwrite(f"img/{assembly}/test{attempt}.png", frame)
         cam.release()
         self.writeResistance()
-
-    def check_wire_bonded(self):
-        return self.wire_bonded
             
 
 root = Tk()
 app = Window(root)
 root.wm_title("Tkinter button")
-root.geometry("1000x1000")
+root.geometry("1000x700")
 root.mainloop()
 
